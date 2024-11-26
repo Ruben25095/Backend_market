@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+#uvicorn main:app --reload --host 192.168.0.10 --port 8000
 app = FastAPI()
 #uvicorn main:app --reload 
 app.add_middleware(
@@ -24,6 +24,12 @@ class UserCreate(BaseModel):
     username: str
     password: str
     useremail: str
+
+
+class UserLogin(BaseModel):
+    useremail: str
+    password: str
+   
 class ProductCreate(BaseModel):
     id: int
     title: str
@@ -59,8 +65,8 @@ def register(user:UserCreate, db: Session = Depends(get_db)):
 
 # Endpoint para login
 @app.post("/login")
-def login(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.username == user.username).first()
+def login(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.useremail == user.useremail).first()
     if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
     return {"message": "Login successful"}
@@ -88,3 +94,12 @@ def add_product(product: ProductCreate, db: Session = Depends(get_db)):
 def get_products(db: Session = Depends(get_db)):
     products = db.query(Product).all()
     return {"products": products}
+
+@app.delete("/delete_product")
+def delete_product(product_id: int, db: Session = Depends(get_db)): 
+    db_product = db.query(Product).filter(Product.id == product_id).first()  
+    if not db_product: 
+        raise HTTPException(status_code=404, detail="Product not found")      
+    db.delete(db_product)                                                     
+    db.commit()  
+    return {"message": "Product deleted successfully"}

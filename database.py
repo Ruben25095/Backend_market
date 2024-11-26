@@ -12,10 +12,10 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    useremail = Column(String, unique=True, index=True)
-    password = Column(String)
+    id = Column(Integer, primary_key=True, index=True,)
+    username = Column(String(80), unique=True, index=True ,)
+    useremail = Column(String(80), unique=True, index=True, )
+    password = Column(String(20), )
    
 class Product(Base):
     __tablename__ = "products"
